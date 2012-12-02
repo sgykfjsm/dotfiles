@@ -1,0 +1,28 @@
+[user]
+  name = shigeyuki fujishima
+  email = shigeyuki.fujishima@gmail.com
+[color]
+  # colorの設定(以下のコマンドは自動で色つける)
+  status = auto
+  diff = auto
+  branch = auto
+  interactive = auto
+  grep = auto
+  ui = true
+[push]
+[core]
+  excludesfile = ~/.gitignore  # globalな.gitignoreの指定
+  autocrlf = input                 # CRLFを自動変換
+  editor = vim
+  quotepath = false
+[merge]
+  tool = vimdiff
+
+[http]
+  sslVerify = false
+
+[alias]
+  co = checkout
+  st = status
+  br = branch
+  ci = commit

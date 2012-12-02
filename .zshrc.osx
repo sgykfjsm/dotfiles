@@ -1,0 +1,18 @@
+export PATH=/usr/local/bin:/usr/local/sbin:~/bin:$PATH
+
+# osx alias
+alias pbc='pbcopy'
+
+# Terminal Colorの設定
+export CLICOLOR=1
+export LSCOLORS=ExFxCxDxBxegedabagacad
+
+# vim
+export EDITOR=/Applications/MacVim.app/Contents/MacOS/Vim
+alias vi='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
+alias vim='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
+
+# なぜかperlが変なところを指すようになったので
+# ここで再設定
+alias perl="/usr/bin/perl5.12"
+
