@@ -8,17 +8,14 @@ alias where="command -v"
 
 case "${OSTYPE}" in
 freebsd*|darwin*)
-    alias ls="ls -alG"
+    alias ls="ls -alGF"
     zle -N expand-to-home-or-insert
     bindkey "@"  expand-to-home-or-insert
     ;;
 linux*)
-    alias la="ls -al"
+    alias la="ls -alF"
     ;;
 esac
-
-# ls
-alias ls="ls -laF"
 
 # process
 alias 'ps?'='pgrep -l -f'

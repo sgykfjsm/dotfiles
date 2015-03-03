@@ -16,10 +16,6 @@ set completion-ignore-case on
 # コンソールの横幅をあふれたとき自動スクロール
 set horizontal-scroll-mode on
 
-# ヒストリー補完機能を Ctrl+N, Ctrl+P に割り当てる
-# "\C-p": history-search-backward
-# "\C-n": history-search-forward
-
 # ビープ音を消す
 set bell-style none
 

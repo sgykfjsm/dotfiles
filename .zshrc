@@ -16,31 +16,17 @@ HELPDIR=/usr/local/share/zsh/help
 #
 bindkey "^?" backward-delete-char
 
-################################
-# Color
-################################
-DEFAULT=$'%{\e[1;0m%}'
-RESET="%{${reset_color}%}"
-GREEN="%{${fg[green]}%}"
-BLUE="%{${fg[blue]}%}"
-BLUE_BOLD="%{${fg_bold[blue]}%}"
-RED="%{${fg[red]}%}"
-CYAN="%{${fg[cyan]}%}"
-WHITE="%{${fg[white]}%}"
-YELLOW="%{${fg[yellow]}%}"
-YELLOW_BOLD="%{${fg_bold[yellow]}%}"
+autoload -Uz colors
+colors
 
 ## Default shell configuration
 #
 # set prompt
-# colors enables us to idenfity color by $fg[red].
-autoload colors
-colors
 case ${UID} in
 0) # root
-    PROMPT="%B${RED}%/#${RESET}%b "
-    PROMPT2="%B${RED}%_#${RESET}%b "
-    SPROMPT="%B${RED}%r is correct? [n,y,a,e]:${RESET}%b "
+    PROMPT="${fg[red]}%/#${reset_color}%b "
+    PROMPT2="${fg[red]}%_#${reset_color}%b "
+    SPROMPT="${fg[red]}%r is correct? [n,y,a,e]:${reset_color}%b "
     [ -n "${REMOTEHOST}${SSH_CONNECTION}" ] &&
         PROMPT="${CYAN}$(echo ${HOST%%.*} | tr '[a-z]' '[A-Z]') ${PROMPT}"
     ;;
@@ -95,7 +81,7 @@ function _git_not_pushed()
   return 0
 }
 
-GIT_PROMPT=" ${RESET}%1(v|%F${CYAN}%1v%2v%f|)${vcs_info_git_pushed}${RESET}${WHITE}${RESET}"
+GIT_PROMPT="${reset_color}%1(v|%F${fg[cyan]}%1v%2v%f|)${vcs_info_git_pushed}${reset_color}"
 
 function _update_venv_info_msg() {
   if [ -n "${VIRTUAL_ENV}" ]; then
@@ -108,21 +94,17 @@ add-zsh-hook precmd _update_venv_info_msg
     ;;
 esac
 
-# PROMPT='${RESET}${GREEN}${WINDOW:+"[$WINDOW]"}${RESET}[%{$fg_bold[green]%}${USER}@%m${RESET}${WHITE}]${RESET} ${WHITE}${WINDOW:+"[$WINDOW]"}${RESET}${RESET}${WHITE}%D{%FT%T.%Z}${RESET} ${RESET}${WHITE}${YELLOW_BOLD}%~${GIT_PROMPT}
-# $ '
-# RPROMPT=" "
-
 #
 # Vi入力モードでPROMPTの色を変える
 # http://memo.officebrook.net/20090226.html
 function zle-line-init zle-keymap-select {
   case $KEYMAP in
     vicmd)
-    PROMPT='${RESET}${GREEN}${WINDOW:+"[$WINDOW]"}${RESET}[%{$fg_bold[cyan]%}${USER}@%m${RESET}${WHITE}]${RESET} ${WHITE}${WINDOW:+"[$WINDOW]"}${RESET}${RESET}${WHITE}%D{%FT%T.%Z}${RESET} ${RESET}${WHITE}${YELLOW_BOLD}%~${GIT_PROMPT}
+    PROMPT='[${fg[green]}%n@%m${reset_color}] %D{%FT%T.%Z} ${fg[yellow]}%/${reset_color} ${GIT_PROMPT}
 $ '
     ;;
     main|viins)
-    PROMPT='${RESET}${GREEN}${WINDOW:+"[$WINDOW]"}${RESET}[%{$fg_bold[green]%}${USER}@%m${RESET}${WHITE}]${RESET} ${WHITE}${WINDOW:+"[$WINDOW]"}${RESET}${RESET}${WHITE}%D{%FT%T.%Z}${RESET} ${RESET}${WHITE}${YELLOW_BOLD}%~${GIT_PROMPT}
+    PROMPT='[${fg[magenta]}%n@%m${reset_color}] %D{%FT%T.%Z} ${fg[yellow]}%/ ${GIT_PROMPT}
 $ '
     ;;
   esac
@@ -363,7 +345,6 @@ export PATH=$PATH:/sbin:/usr/local/bin
 # play framework
 ########################
 export PATH=$PATH:~/local/script/scala/play
-export PATH=$PATH:~/.cabal/bin:~/bin/datapipeline-cli
 export MANPATH=$MANPATH:/usr/local/share/man
 
 ########################
@@ -485,3 +466,27 @@ export LESSCHARSET=utf-8
 which src-hilite-lesspipe.sh > /dev/null || \
     export LESSOPEN='| /usr/local/bin/src-hilite-lesspipe.sh %s'
 
+# cdr
+if is-at-least 4.3.11; then
+  autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
+  add-zsh-hook chpwd chpwd_recent_dirs
+  zstyle ':chpwd:*' recent-dirs-max 5000
+  zstyle ':chpwd:*' recent-dirs-default yes
+  zstyle ':completion:*' recent-dirs-insert both
+fi
+
+# zaw
+if [ -f ~/.zsh_tools/zaw/zaw.zsh ]; then
+    source ~/.zsh_tools/zaw/zaw.zsh
+    bindkey '^R' zaw-history
+    if is-at-least 4.3.11; then
+      bindkey '^@' zaw-cdr
+    fi
+
+    zstyle ':filter-select' case-insensitive yes
+    zstyle ':filter-select:highlight' matched fg=red, standout
+    zstyle ':filter-select' max-lines 10 # use 10 lines for filter-select
+    zstyle ':filter-select' rotate-list yes # enable rotation for filter-select
+    zstyle ':filter-select' case-insensitive yes # enable case-insensitive search
+    zstyle ':filter-select' extended-search yes
+fi
