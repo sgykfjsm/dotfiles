@@ -1,5 +1,5 @@
 [user]
-  name = shigeyuki fujishima
+  name = shigeyuki.fujishima
   email = shigeyuki.fujishima@gmail.com
 [color]
   # colorの設定(以下のコマンドは自動で色つける)
@@ -9,14 +9,14 @@
   interactive = auto
   grep = auto
   ui = true
-[push]
 [core]
   excludesfile = ~/.gitignore  # globalな.gitignoreの指定
   autocrlf = input                 # CRLFを自動変換
-  editor = vim
+  editor = /Applications/MacVim.app/Contents/MacOS/Vim
   quotepath = false
 [merge]
   tool = vimdiff
+  ff = false
 
 [http]
   sslVerify = false
@@ -26,3 +26,15 @@
   st = status
   br = branch
   ci = commit
+[push]
+  default = simple
+[filter "media"]
+  required = true
+  clean = git media clean %f
+  smudge = git media smudge %f
+[diff]
+  tool = vimdiff
+  algorithm = histogram
+  # external = git_diff_wrapper
+# [pager]
+#   diff=

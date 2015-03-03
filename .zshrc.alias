@@ -1,10 +1,26 @@
+## Alias configuration
+#
+# expand aliases before completing
+#
+setopt complete_aliases     # aliased ls needs if file/dir completions work
+
+alias where="command -v"
+
+case "${OSTYPE}" in
+freebsd*|darwin*)
+    alias ls="ls -alG"
+    zle -N expand-to-home-or-insert
+    bindkey "@"  expand-to-home-or-insert
+    ;;
+linux*)
+    alias la="ls -al"
+    ;;
+esac
+
 # ls
-alias la="ls -a"
-alias lf="ls -F"
-alias ll="ls -l"
+alias ls="ls -laF"
 
 # process
-# alias j="jobs -l"
 alias 'ps?'='pgrep -l -f'
 alias pk='pkill -f'
 
@@ -14,7 +30,6 @@ alias df="df -h"
 alias duh="du -h ./ --max-depth=1"
 
 # grep
-alias 'gr'='grep --color=auto -ERUIn'
 alias 'grep'='grep --color=auto'
 
 # extract http://d.hatena.ne.jp/jeneshicc/20110215/1297778049
@@ -50,3 +65,57 @@ alias php='/usr/local/php5/bin/php'
 
 # view
 alias view='vim -R'
+
+# mkdir and cd
+mkcd() { mkdir -p "$@" && cd "$_"; }
+
+# open -a
+openapp() {
+    BUFFER="open -a "
+    CURSOR=$#BUFFER
+}
+zle -N openapp
+bindkey '^o' openapp
+
+# markdown preview
+markdown_preview() {
+    case $1 in
+        -d | -dump | --dump )
+            shift
+            /usr/local/bin/Markdown.pl $1 | lynx -stdin -raw -dump
+            ;;
+        * )
+            /usr/local/bin/Markdown.pl $1 | lynx -stdin -raw
+            ;;
+    esac
+}
+
+# blog
+_blog_check() {
+    if [ -z "${BLOG_HOME}" ]; then
+        echo 'Please set \$BLOG_HOME in your .zshrc'
+        exit 1
+    fi
+}
+
+blog_write() {
+    _blog_check
+    cd ${BLOG_HOME}
+    rake new_post["$1"]
+}
+
+blog_preview() {
+    _blog_check
+    cd ${BLOG_HOME}
+    rake generate
+    rake preview
+    cd - > /dev/null
+}
+
+blog_deploy() {
+    _blog_check
+    cd ${BLOG_HOME}
+    rake generate
+    rake deploy
+    cd - > /dev/null
+}

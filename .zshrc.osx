@@ -12,7 +12,56 @@ export EDITOR=/Applications/MacVim.app/Contents/MacOS/Vim
 alias vi='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
 alias vim='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
 
-# なぜかperlが変なところを指すようになったので
-# ここで再設定
-alias perl="/usr/bin/perl5.12"
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_15.jdk/Contents/Home
+
+# GNU command
+brew_prefix=$(brew --prefix coreutils)
+alias base64="$brew_prefix/bin/gbase64"
+alias basename="$brew_prefix/bin/gbasename"
+alias cat="$brew_prefix/bin/gcat"
+alias chcon="$brew_prefix/bin/gchcon"
+alias chgrp="$brew_prefix/bin/gchgrp"
+alias chmod="$brew_prefix/bin/gchmod"
+alias chown="$brew_prefix/bin/gchown"
+alias date="$brew_prefix/bin/gdate"
+unset brew_prefix
+
+# boot2docker
+export DOCKER_HOST=tcp://192.168.59.103:2376
+export DOCKER_CERT_PATH=/Users/sgyk/.boot2docker/certs/boot2docker-vm
+export DOCKER_TLS_VERIFY=1
+
+### AWS setting
+export AWS_RDS_HOME=~/bin/RDSCli
+export SERVICE_HOME=${AWS_RDS_HOME}
+export PATH=${PATH}:${AWS_RDS_HOME}/bin
+export PATH=${PATH}:/Users/sgyk/bin/AWS-ElasticBeanstalk-CLI-2.6.4/eb/macosx/python2.7
+export EC2_REGION=ap-northeast-1 # default region
+
+### golang
+export GOROOT=/usr/local/go
+export GOPATH=/Users/sgyk/local/script/golang
+export PATH=$PATH:${GOROOT}/bin:${GOPATH}/bin
+
+## git-flowの補完
+source ~/.zsh_tools/git-flow-completion/git-flow-completion.plugin.zsh
+
+## 自分用関数のための環境変数
+BLOG_HOME=~/local/blog
+
+export powerline_symbols=~/.font/powerline-symbols.sfd
+
+export PGDATA=/usr/local/var/postgres
+
+## local固有設定
+#
+[ -f ~/.zshrc.local ] && source ~/.zshrc.local
+
+### Added by the Heroku Toolbelt
+export PATH="/usr/local/heroku/bin:$PATH"
+
+[[ -s /Users/sgyk/.nvm/nvm.sh ]] && . /Users/sgyk/.nvm/nvm.sh # This loads NVM
+
+PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
+export SCALATRA_JREBEL=~/bin/jrebel.jar
 

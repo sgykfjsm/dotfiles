@@ -1,36 +1,24 @@
 # users generic .zshrc file for zsh(1)
 
-
 ## Environment variable configuration
 #
 # LANG
 # http://curiousabt.blog27.fc2.com/blog-entry-65.html
 export LANG=ja_JP.UTF-8
-export LESSCHARSET=utf-8
 
+## Online Help
+#
+unalias run-help > /dev/null 2>&1
+autoload run-help
+HELPDIR=/usr/local/share/zsh/help
 
 ## Backspace key
 #
 bindkey "^?" backward-delete-char
 
-## Default shell configuration
-#
-# set prompt
-# colors enables us to idenfity color by $fg[red].
-autoload colors
-colors
-case ${UID} in
-0)
-    PROMPT="%B%{${fg[red]}%}%/#%{${reset_color}%}%b "
-    PROMPT2="%B%{${fg[red]}%}%_#%{${reset_color}%}%b "
-    SPROMPT="%B%{${fg[red]}%}%r is correct? [n,y,a,e]:%{${reset_color}%}%b "
-    [ -n "${REMOTEHOST}${SSH_CONNECTION}" ] &&
-        PROMPT="%{${fg[cyan]}%}$(echo ${HOST%%.*} | tr '[a-z]' '[A-Z]') ${PROMPT}"
-    ;;
-*)
-#
+################################
 # Color
-#
+################################
 DEFAULT=$'%{\e[1;0m%}'
 RESET="%{${reset_color}%}"
 GREEN="%{${fg[green]}%}"
@@ -41,6 +29,22 @@ CYAN="%{${fg[cyan]}%}"
 WHITE="%{${fg[white]}%}"
 YELLOW="%{${fg[yellow]}%}"
 YELLOW_BOLD="%{${fg_bold[yellow]}%}"
+
+## Default shell configuration
+#
+# set prompt
+# colors enables us to idenfity color by $fg[red].
+autoload colors
+colors
+case ${UID} in
+0) # root
+    PROMPT="%B${RED}%/#${RESET}%b "
+    PROMPT2="%B${RED}%_#${RESET}%b "
+    SPROMPT="%B${RED}%r is correct? [n,y,a,e]:${RESET}%b "
+    [ -n "${REMOTEHOST}${SSH_CONNECTION}" ] &&
+        PROMPT="${CYAN}$(echo ${HOST%%.*} | tr '[a-z]' '[A-Z]') ${PROMPT}"
+    ;;
+*)
 #
 # Prompt
 #
@@ -61,10 +65,9 @@ zstyle ':vcs_info:bzr:*' use-simple true
 
 autoload -Uz is-at-least
 if is-at-least 4.3.10; then
-  # この check-for-changes が今回の設定するところ
   zstyle ':vcs_info:git:*' check-for-changes true
-  zstyle ':vcs_info:git:*' stagedstr "*"    # 適当な文字列に変更する
-  zstyle ':vcs_info:git:*' unstagedstr "+"  # 適当の文字列に変更する
+  zstyle ':vcs_info:git:*' stagedstr "[+]"
+  zstyle ':vcs_info:git:*' unstagedstr "[!]"
   zstyle ':vcs_info:git:*' formats '(%s)-[%b] %c%u'
   zstyle ':vcs_info:git:*' actionformats '(%s)-[%b|%a] %c%u'
 fi
@@ -87,20 +90,27 @@ function _git_not_pushed()
         return 0
       fi
     done
-    echo "{?}"
+    echo "[*]"
   fi
   return 0
 }
 
-GIT_PROMPT="%1(v|%F${CYAN}%1v%2v%f|)${vcs_info_git_pushed}${RESET}${WHITE}${RESET}"
+GIT_PROMPT=" ${RESET}%1(v|%F${CYAN}%1v%2v%f|)${vcs_info_git_pushed}${RESET}${WHITE}${RESET}"
+
+function _update_venv_info_msg() {
+  if [ -n "${VIRTUAL_ENV}" ]; then
+      VIRTUAL_ENV_PROMPT=$(echo ${VIRTUAL_ENV%/*} | awk -F"/" -v OFS="/" '{print $(NF - 1), $NF}')
+      psvar[2]="((${VIRTUAL_ENV_PROMPT}))"
+  fi
+}
+add-zsh-hook precmd _update_venv_info_msg
 
     ;;
 esac
 
-PROMPT='${RESET}${GREEN}${WINDOW:+"[$WINDOW]"}${RESET}[%{$fg_bold[green]%}${USER}@%m${RESET}${WHITE}]${RESET} ${WHITE}${WINDOW:+"[$WINDOW]"}${RESET}${RESET}${WHITE}%D %*${RESET} ${RESET}${WHITE}${YELLOW_BOLD}%~ ${GIT_PROMPT}
-$ '
-RPROMPT=" "
-
+# PROMPT='${RESET}${GREEN}${WINDOW:+"[$WINDOW]"}${RESET}[%{$fg_bold[green]%}${USER}@%m${RESET}${WHITE}]${RESET} ${WHITE}${WINDOW:+"[$WINDOW]"}${RESET}${RESET}${WHITE}%D{%FT%T.%Z}${RESET} ${RESET}${WHITE}${YELLOW_BOLD}%~${GIT_PROMPT}
+# $ '
+# RPROMPT=" "
 
 #
 # Vi入力モードでPROMPTの色を変える
@@ -108,11 +118,11 @@ RPROMPT=" "
 function zle-line-init zle-keymap-select {
   case $KEYMAP in
     vicmd)
-    PROMPT='${RESET}${GREEN}${WINDOW:+"[$WINDOW]"}${RESET}[%{$fg_bold[cyan]%}${USER}@%m${RESET}${WHITE}]${RESET} ${WHITE}${WINDOW:+"[$WINDOW]"}${RESET}${RESET}${WHITE}%D %*${RESET} ${RESET}${WHITE}${YELLOW_BOLD}%~ ${GIT_PROMPT}
+    PROMPT='${RESET}${GREEN}${WINDOW:+"[$WINDOW]"}${RESET}[%{$fg_bold[cyan]%}${USER}@%m${RESET}${WHITE}]${RESET} ${WHITE}${WINDOW:+"[$WINDOW]"}${RESET}${RESET}${WHITE}%D{%FT%T.%Z}${RESET} ${RESET}${WHITE}${YELLOW_BOLD}%~${GIT_PROMPT}
 $ '
     ;;
     main|viins)
-    PROMPT='${RESET}${GREEN}${WINDOW:+"[$WINDOW]"}${RESET}[%{$fg_bold[green]%}${USER}@%m${RESET}${WHITE}]${RESET} ${WHITE}${WINDOW:+"[$WINDOW]"}${RESET}${RESET}${WHITE}%D %*${RESET} ${RESET}${WHITE}${YELLOW_BOLD}%~ ${GIT_PROMPT}
+    PROMPT='${RESET}${GREEN}${WINDOW:+"[$WINDOW]"}${RESET}[%{$fg_bold[green]%}${USER}@%m${RESET}${WHITE}]${RESET} ${WHITE}${WINDOW:+"[$WINDOW]"}${RESET}${RESET}${WHITE}%D{%FT%T.%Z}${RESET} ${RESET}${WHITE}${YELLOW_BOLD}%~${GIT_PROMPT}
 $ '
     ;;
   esac
@@ -125,7 +135,6 @@ zle -N zle-keymap-select
 # ${MY_MY_PROMPT_COLOR}はprecmdで変化させている数値。
 local MY_COLOR="$ESCX"'%(0?.${MY_PROMPT_COLOR}.31)'m
 local NORMAL_COLOR="$ESCX"m
-
 
 # 指定したコマンド名がなく、ディレクトリ名と一致した場合 cd する
 setopt auto_cd
@@ -178,7 +187,21 @@ zstyle ':completion:*:sudo:*' command-path /usr/local/sbin /usr/local/bin /usr/s
 # 色付きで補完する
 zstyle ':completion:*' list-colors di=34 fi=0
 # 補完候補を選択するときにわかりやすくする
-zstyle ':completion:*:default' menu select=1
+zstyle ':completion:*:default' menu select=2
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*' completer _expand _complete _match _prefix _approximate _list _history
+zstyle ':completion:*:messages' format '%F{YELLOW}%d'$DEFAULT
+zstyle ':completion:*:warnings' format '%F{RED}No matches for:''%F{YELLOW} %d'$DEFAULT
+zstyle ':completion:*:descriptions' format '%F{YELLOW}completing %B%d%b'$DEFAULT
+zstyle ':completion:*:options' description 'yes'
+zstyle ':completion:*:descriptions' format '%F{yellow}Completing %B%d%b%f'$DEFAULT
+# セパレータを設定する
+zstyle ':completion:*' list-separator '-->'
+zstyle ':completion:*:manuals' separate-sections true
+
+# マッチ種別を別々に表示
+zstyle ':completion:*' group-name ''
+
 # 複数のリダイレクトやパイプなど、必要に応じて tee や cat の機能が使われる
 setopt multios
 
@@ -187,6 +210,7 @@ setopt noautoremoveslash
 
 # beepを鳴らさないようにする
 setopt nolistbeep
+setopt nobeep
 
 # Match without pattern
 # ex. > rm *~398# remove * without a file "398". For test, use "echo *~398"
@@ -199,98 +223,23 @@ setopt extended_glob
 #
 bindkey -v
 
-# historical backward/forward search with linehead string binded to ^P/^N
-#
-autoload history-search-end
-zle -N history-beginning-search-backward-end history-search-end
-zle -N history-beginning-search-forward-end history-search-end
-bindkey "^p" history-beginning-search-backward-end
-bindkey "^n" history-beginning-search-forward-end
-bindkey "\\ep" history-beginning-search-backward-end
-bindkey "\\en" history-beginning-search-forward-end
-
-# glob(*)によるインクリメンタルサーチ
-bindkey '^R' history-incremental-pattern-search-backward
-bindkey '^S' history-incremental-pattern-search-forward
-
-## Command history configuration
-HISTFILE=~/.zsh_history
-HISTSIZE=10000
-SAVEHIST=10000
-
-# 登録済コマンド行は古い方を削除
-setopt hist_ignore_all_dups
-
-# historyの共有
-setopt share_history
-
-# 余分な空白は詰める
-setopt hist_reduce_blanks
-
-# add history when command executed.
-setopt inc_append_history
-
-# history (fc -l) コマンドをヒストリリストから取り除く。
-setopt hist_no_store
-# サスペンド中のプロセスと同じコマンド名を実行した場合はリジュームする
-#setopt auto_resume
-
-# ファイル名で #, ~, ^ の 3 文字を正規表現として扱う
-#setopt extended_glob
+# history command setting
+source ~/.zshrc_history_config
 
 # Ctrl+S/Ctrl+Q によるフロー制御を使わないようにする
 #setopt NO_flow_control
 
-# 各コマンドが実行されるときにパスをハッシュに入れる
-#setopt hash_cmds
-
-# コマンドラインの先頭がスペースで始まる場合ヒストリに追加しない
-setopt hist_ignore_space
-
-# ヒストリを呼び出してから実行する間に一旦編集できる状態になる
-#setopt hist_verify
-
-# シェルが終了しても裏ジョブに HUP シグナルを送らないようにする
-#setopt NO_hup
-
-# コマンドラインでも # 以降をコメントと見なす
-#setopt interactive_comments
-
-# メールスプール $MAIL が読まれていたらワーニングを表示する
-#setopt mail_warning
-
 # ファイル名の展開でディレクトリにマッチした場合末尾に / を付加する
-#setopt mark_dirs
-
-# ファイル名の展開で、辞書順ではなく数値的にソートされるようになる
-#setopt numeric_glob_sort
+setopt mark_dirs
 
 # コマンド名に / が含まれているとき PATH 中のサブディレクトリを探す
 setopt path_dirs
 
 # 戻り値が 0 以外の場合終了コードを表示する
-# setopt print_exit_value
-
-# rm * などの際、本当に全てのファイルを消して良いかの確認しないようになる
-setopt rm_star_silent
-
-# rm_star_silent の逆で、10 秒間反応しなくなり、頭を冷ます時間が与えられる
-#setopt rm_star_wait
-
-# デフォルトの複数行コマンドライン編集ではなく、１行編集モードになる
-#setopt single_line_zle
+setopt print_exit_value
 
 # コマンドラインがどのように展開され実行されたかを表示するようになる
-#setopt xtrace
-
-# ^でcd ..する
-function cdup() {
-echo
-cd ..
-zle reset-prompt
-}
-zle -N cdup
-bindkey '\^' cdup
+# setopt xtrace
 
 # ctrl-w, ctrl-bキーで単語移動
 bindkey "^W" forward-word
@@ -324,56 +273,23 @@ function cwaf() {
 ## Completion configuration
 fpath=(~/.zsh/functions/Completion ${fpath})
 autoload -U compinit
-compinit -u
+compinit
 
 ## zsh editor
 #
 autoload zed
 
-
 ## Prediction configuration
 #
 autoload predict-on
-#predict-off
 
 ## Command Line Stack [Esc]-[q]
 bindkey -a 'q' push-line
 
-
-## Alias configuration
-#
-# expand aliases before completing
-#
-setopt complete_aliases     # aliased ls needs if file/dir completions work
-
-alias where="command -v"
-
-case "${OSTYPE}" in
-freebsd*|darwin*)
-    alias ls="ls -alG"
-    zle -N expand-to-home-or-insert
-    bindkey "@"  expand-to-home-or-insert
-    ;;
-linux*)
-    alias la="ls -al"
-    ;;
-esac
-
-
 case "${OSTYPE}" in
 # MacOSX
 darwin*)
-    # export PATH=$PATH:/opt/local/bin:/opt/local/sbin/
-    export PATH=$PATH:/System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources:/usr/local/php5/bin
-    ########################################################################################
-    ## php-version (activate default PHP version and autocompletion)
-    ## PHP_HOME                      => should reflect location of compiled PHP versions
-    ## PHPVERSION_DISABLE_COMPLETE=1 => to disable shell completion
-    #########################################################################################
-    #export PHP_HOME=$HOME/local/php/versions
-    #export PHP_VERSIONS=$(dirname $(brew --prefix php))
-    #[ -f $(brew --prefix php-version)/php-version.sh ] &&
-    #    source $(brew --prefix php-version)/php-version.sh && php-version 5.4.3 >/dev/null
+    export PATH=$PATH:/System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources:~/bin
     ;;
 freebsd*)
     case ${UID} in
@@ -417,25 +333,18 @@ cons25)
     unset LANG
   export LSCOLORS=ExFxCxdxBxegedabagacad
 
-    export LS_COLORS='di=01;32:ln=01;35:so=01;32:ex=01;31:bd=46;34:cd=43;34:su=41;30:sg=46;30'
-    zstyle ':completion:*' list-colors \
-        'di=;36;1' 'ln=;35;1' 'so=;32;1' 'ex=31;1' 'bd=46;34' 'cd=43;34'
+    # export LS_COLORS='di=01;32:ln=01;35:so=01;32:ex=01;31:bd=46;34:cd=43;34:su=41;30:sg=46;30'
+    export LS_COLORS='di=34:ln=35:so=32:pi=33:ex=31:bd=46;34:cd=43;34:su=41;30:sg=46;30:tw=42;30:ow=43;30'
+    # zstyle ':completion:*' list-colors \
+    #     'di=;36;1' 'ln=;35;1' 'so=;32;1' 'ex=31;1' 'bd=46;34' 'cd=43;34'
+    zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
     ;;
 
 kterm*|xterm*)
-   # Terminal.app
-#    precmd() {
-#        echo -ne "\033]0;${USER}@${HOST%%.*}:${PWD}\007"
-#    }
-    # export LSCOLORS=exfxcxdxbxegedabagacad
-    # export LSCOLORS=gxfxcxdxbxegedabagacad
-    # export LS_COLORS='di=1;34:ln=35:so=32:pi=33:ex=31:bd=46;34:cd=43;34:su=41;30:sg=46;30'
-
     export CLICOLOR=1
-    export LSCOLORS=ExFxCxDxBxegedabagacad
+    export LS_COLORS='di=34:ln=35:so=32:pi=33:ex=31:bd=46;34:cd=43;34:su=41;30:sg=46;30:tw=42;30:ow=43;30'
 
-    zstyle ':completion:*' list-colors \
-        'di=36' 'ln=35' 'so=32' 'ex=31' 'bd=46;34' 'cd=43;34'
+    zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
     ;;
 
 dumb)
@@ -443,14 +352,27 @@ dumb)
     ;;
 esac
 
+# コマンドにも色を付ける
+source ~/.zsh_tools/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
 
 
 export EDITOR=vim
 export PATH=$PATH:/sbin:/usr/local/bin
+
+########################
 # play framework
-export PATH=$PATH:~/local/script/scala/play:/usr/local/share/python
-# export MANPATH=$MANPATH:/opt/local/man:/usr/local/share/man
+########################
+export PATH=$PATH:~/local/script/scala/play
+export PATH=$PATH:~/.cabal/bin:~/bin/datapipeline-cli
 export MANPATH=$MANPATH:/usr/local/share/man
+
+########################
+# rbenv
+########################
+export PATH="$HOME/.rbenv/bin:$PATH"
+if which rbenv > /dev/null; then
+    eval "$(rbenv init -)"
+fi
 
 expand-to-home-or-insert () {
         if [ "$LBUFFER" = "" -o "$LBUFFER[-1]" = " " ]; then
@@ -459,11 +381,6 @@ expand-to-home-or-insert () {
                 zle self-insert
         fi
 }
-
-# C-M-h でチートシートを表示する
-cheat-sheet () { zle -M "`cat ~/dotfiles/.zsh/cheat-sheet`" }
-zle -N cheat-sheet
-bindkey "^[^h" cheat-sheet
 
 # zsh の exntended_glob と HEAD^^^ を共存させる。
 # http://subtech.g.hatena.ne.jp/cho45/20080617/1213629154
@@ -516,33 +433,31 @@ function rmf(){
    done
 }
 
-function __rm_single_file(){
-       if ! [ -d ~/.Trash/ ]
-       then
-               command /bin/mkdir ~/.Trash
-       fi
+alias rm=__rm_single_file
 
-       if ! [ $# -eq 1 ]
-       then
+function __rm_single_file(){
+       [ -d ~/.Trash/ ] || command /bin/mkdir ~/.Trash
+
+       [ $# -eq 1 ] || {
                echo "__rm_single_file: 1 argument required but $# passed."
                exit
-       fi
+        }
 
-       if [ -e $1 ]
-       then
-               BASENAME=`basename $1`
-               NAME=$BASENAME
-               COUNT=0
-               while [ -e ~/.Trash/$NAME ]
-               do
-                       COUNT=$(($COUNT+1))
-                       NAME="$BASENAME.$COUNT"
-               done
-
-               command /bin/mv $1 ~/.Trash/$NAME
-       else
+        [ -e $1 ] || {
                echo "No such file or directory: $file"
-       fi
+               exit
+        }
+
+        BASENAME=`basename $1`
+        NAME=$BASENAME
+        COUNT=0
+        while [ -e ~/.Trash/$NAME ]
+        do
+               COUNT=$(($COUNT+1))
+               NAME="$BASENAME.$COUNT"
+        done
+
+        command /bin/mv $1 ~/.Trash/$NAME
 }
 
 ## alias設定
@@ -552,20 +467,21 @@ function __rm_single_file(){
 case "${OSTYPE}" in
 # Mac(Unix)
 darwin*)
-    # ここに設定
     [ -f ~/dotfiles/.zshrc.osx ] && source ~/dotfiles/.zshrc.osx
     ;;
 # Linux
 linux*)
-    # ここに設定
     [ -f ~/dotfiles/.zshrc.linux ] && source ~/dotfiles/.zshrc.linux
     ;;
 esac
 
+autoload -Uz zmv
 
-## local固有設定
-#
-[ -f ~/.zshrc.local ] && source ~/.zshrc.local
+# less
+# required: GNU Source-highlight
+# Mac: brew install, Ubuntu: apt-get install, Fedora: yum install source-highlight
+export LESS="-MQRSFXWin -P'?f%f .?ltLine %lt:?pt%pt\%:?btByte %bt:-...'"
+export LESSCHARSET=utf-8
+which src-hilite-lesspipe.sh > /dev/null || \
+    export LESSOPEN='| /usr/local/bin/src-hilite-lesspipe.sh %s'
 
-### Added by the Heroku Toolbelt
-export PATH="/usr/local/heroku/bin:$PATH"
