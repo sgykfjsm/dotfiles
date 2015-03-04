@@ -245,6 +245,7 @@ if has("autocmd")
 endif
 
 au BufNewFile,BufRead *.template set filetype=json
+au BufNewFile,BufRead .tmux.conf set filetype=tmux | compiler tmux
 
 "----------------------------
 " 表示 Apperance

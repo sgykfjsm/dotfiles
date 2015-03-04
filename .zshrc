@@ -17,24 +17,53 @@ HELPDIR=/usr/local/share/zsh/help
 bindkey "^?" backward-delete-char
 
 autoload -Uz colors
-colors
+# colors
+
+############################
+# color
+# http://www.unix.com/shell-programming-and-scripting/184735-zsh-prompt-variable-expansion-ansi-color-sequences.html
+
+_reset='%{'$(print -P '\033\[0m')'%}'
+fg_white='%{'$(print -P '\033[0;1;37m')'%}'
+fg_lightgray='%{'$(print -P '\033[0;0;37m')'%}'
+fg_gray='%{'$(print -P '\033[0;1;30m')'%}'
+fg_black='%{'$(print -P '\033[0;0;30m')'%}'
+fg_red='%{'$(print -P '\033[0;0;31m')'%}'
+fg_lightred='%{'$(print -P '\033[0;1;31m')'%}'
+fg_green='%{'$(print -P '\033[0;0;32m')'%}'
+fg_lightgreen='%{'$(print -P '\033[0;1;32m')'%}'
+fg_brown='%{'$(print -P '\033[0;0;33m')'%}'
+fg_yellow='%{'$(print -P '\033[0;1;33m')'%}'
+fg_blue='%{'$(print -P '\033[0;0;34m')'%}'
+fg_lightblue='%{'$(print -P '\033[0;1;34m')'%}'
+fg_purple='%{'$(print -P '\033[0;0;35m')'%}'
+fg_pink='%{'$(print -P '\033[0;1;35m')'%}'
+fg_cyan='%{'$(print -P '\033[0;0;36m')'%}'
+fg_lightcyan='%{'$(print -P '\033[0;1;36m')'%}'
+bg_black='%{'$(print -P '\033[40m')'%}'
+bg_red='%{'$(print -P '\033[41m')'%}'
+bg_green='%{'$(print -P '\033[42m')'%}'
+bg_yellow='%{'$(print -P '\033[43m')'%}'
+bg_blue='%{'$(print -P '\033[44m')'%}'
+bg_magenta='%{'$(print -P '\033[45m')'%}'
+bg_cyan='%{'$(print -P '\033[46m')'%}'
+bg_white='%{'$(print -P '\033[47m')'%}'
 
 ## Default shell configuration
 #
 # set prompt
 case ${UID} in
 0) # root
-    PROMPT="${fg[red]}%/#${reset_color}%b "
-    PROMPT2="${fg[red]}%_#${reset_color}%b "
-    SPROMPT="${fg[red]}%r is correct? [n,y,a,e]:${reset_color}%b "
+    PROMPT="${fg_red}%/#${_reset}%b "
+    SPROMPT="${fg_red}%r is correct? [n,y,a,e]:${_reset}%b "
     [ -n "${REMOTEHOST}${SSH_CONNECTION}" ] &&
-        PROMPT="${CYAN}$(echo ${HOST%%.*} | tr '[a-z]' '[A-Z]') ${PROMPT}"
+        PROMPT="${fg_cyan}$(echo ${HOST%%.*} | tr '[a-z]' '[A-Z]') ${PROMPT}"
     ;;
 *)
 #
 # Prompt
 #
-setopt promptsubst
+# setopt prompt_subst
 # 改行のない出力をプロンプトで上書きするのを防ぐ
 unsetopt promptcr
 
@@ -81,7 +110,7 @@ function _git_not_pushed()
   return 0
 }
 
-GIT_PROMPT="${reset_color}%1(v|%F${fg[cyan]}%1v%2v%f|)${vcs_info_git_pushed}${reset_color}"
+GIT_PROMPT="%1(v|%F${fg_cyan}%1v%2v%f|)${vcs_info_git_pushed}${_reset}"
 
 function _update_venv_info_msg() {
   if [ -n "${VIRTUAL_ENV}" ]; then
@@ -100,14 +129,24 @@ esac
 function zle-line-init zle-keymap-select {
   case $KEYMAP in
     vicmd)
-        PROMPT='${reset_color}[${fg[green]}%n@%m${reset_color}] %D{%FT%T.%Z} ${fg[yellow]}%/${reset_color}%{$fg[black]%(?.$bg[green].$bg[red])%}[%?]${reset_color}${GIT_PROMPT}
-$ '
+        PROMPT="[${fg_blue}%n@%m${_reset}]"
     ;;
     main|viins)
-    PROMPT='${reset_color}[${fg[magenta]}%n@%m${reset_color}] %D{%FT%T.%Z} ${fg[yellow]}%/${reset_color}%{$fg[black]%(?.$bg[green].$bg[red])%}[%?]${reset_color}${GIT_PROMPT}
-$ '
+        # PROMPT="[${fg[magenta]}%n@%m${_reset}]"
+        PROMPT="[${fg_purple}%n@%m${_reset}]"
+        # PROMPT="[%n@%m}]"
     ;;
   esac
+  # PROMPT+=" %D{%FT%T.%Z}" # 日付と時刻
+  # PROMPT+=" ${_reset}${fg[yellow]}%/${_reset}" # カレントのディレクトリ
+  # PROMPT+=" ${_reset}%{$fg[black]%(?.$bg[green].$bg[red])%}%?${_reset}" # 直前のコマンドのreturn値
+  # PROMPT+=" ${GIT_PROMPT}"
+  PROMPT+="%(?.${fg_white}.${fg_red})%}(%?)${_reset}" # 直前のコマンドのreturn値
+  PROMPT+="${fg_yellow}%D{%FT%T.%Z}${_reset}" # 日付と時刻
+  PROMPT+="${fg_green}%/${_reset}" # カレントのディレクトリ
+  PROMPT+="${GIT_PROMPT}"
+  PROMPT+="
+$ " # 改行
   zle reset-prompt
 }
 PROMPT2=''
@@ -325,7 +364,7 @@ case "${TERM}" in
 
         zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
         precmd() {
-            echo -ne "\033]0;%n@%m:%d\007"
+            echo -ne "\033]0;${USER}@${HOST}:$(pwd) $(date '+%FT%T.%Z')\007"
         }
         ;;
 
