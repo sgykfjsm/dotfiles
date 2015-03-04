@@ -453,28 +453,23 @@ function rmf(){
    done
 }
 
-alias rm=__rm_single_file
-
 function __rm_single_file(){
        [ -d ~/.Trash/ ] || command /bin/mkdir ~/.Trash
 
        [ $# -eq 1 ] || {
                echo "__rm_single_file: 1 argument required but $# passed."
-               exit
+               return -1
         }
 
         [ -e $1 ] || {
                echo "No such file or directory: $file"
-               exit
+               return -1
         }
 
-        BASENAME=`basename $1`
-        NAME=$BASENAME
-        COUNT=0
+        NAME=${1##*/}
         while [ -e ~/.Trash/$NAME ]
         do
-               COUNT=$(($COUNT+1))
-               NAME="$BASENAME.$COUNT"
+            NAME="$BASENAME.$(date '+%Y%m%d%H%M%S').$(cat /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:]' | head -c 8 ; echo)"
         done
 
         command /bin/mv $1 ~/.Trash/$NAME
