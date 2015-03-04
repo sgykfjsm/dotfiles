@@ -88,6 +88,8 @@ Plugin 'avakhov/vim-yaml'
 " statusline
 Plugin 'itchyny/lightline.vim'
 
+Plugin 'tmux-plugins/vim-tmux'
+
 filetype plugin indent on
 
 "-------------------------------------------------------------------------------
@@ -241,6 +243,8 @@ if has("autocmd")
   autocmd FileType scala      setlocal sw=4 sts=4 ts=4 et
   autocmd FileType bats       setlocal sw=4 sts=4 ts=4 et
 endif
+
+au BufNewFile,BufRead *.template set filetype=json
 
 "----------------------------
 " 表示 Apperance
@@ -679,3 +683,7 @@ source ~/dotfiles/.vimrc.NREDTree
 "---------------------------
 let g:syntastic_json_checkers=['jsonlint']
 
+"---------------------------
+" vim-json
+"---------------------------
+let g:vim_json_syntax_conceal = 0
