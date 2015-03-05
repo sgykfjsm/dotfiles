@@ -75,7 +75,6 @@ zle -N openapp
 bindkey '^o' openapp
 
 diff_rec() {
-    set -x
     [ $# -eq 2 ] || {
         echo "Passed parameters should be 2"
         return 1
@@ -101,7 +100,6 @@ diff_rec() {
             echo ${res}
         fi
     done
-    set +x
 }
 
 # markdown preview
