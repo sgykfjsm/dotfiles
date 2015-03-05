@@ -90,6 +90,16 @@ Plugin 'itchyny/lightline.vim'
 
 Plugin 'tmux-plugins/vim-tmux'
 
+" Twitter
+Plugin 'TwitVim'
+
+"
+Plugin 'Shougo/vimproc'
+Plugin 'Shougo/vimshell'
+
+" whether for mac
+Plugin 'modsound/mac_notify-vim'
+
 filetype plugin indent on
 
 "-------------------------------------------------------------------------------
@@ -688,3 +698,24 @@ let g:syntastic_json_checkers=['jsonlint']
 " vim-json
 "---------------------------
 let g:vim_json_syntax_conceal = 0
+
+"---------------------------
+" TwitVim
+"---------------------------
+let twitvim_browser_cmd = 'open' " for Mac
+let twitvim_force_ssl = 1
+let twitvim_count = 40
+let twitvim_filter_enable = 1
+let twitvim_filter_regex = '!\v^【(自動|定期).*|(.*https?://ask\.fm.*)|#(countkun|1topi|bookmeter)|(.*(#|＃)[^\s]+){5,}|#RTした人全員|.*分以内に.*RTされたら|^!(RT)|^[^RT].*RT|RT\s.*RT\s'
+
+"---------------------------
+" 'modsound/mac_notify-vim'
+"---------------------------
+function! s:weather_report()
+  let l:weather = system("curl --silent http://weather.livedoor.com/forecast/rss/area/130010.xml
+  \ | grep '<description>'
+  \ | sed -e 's/<description>//g'
+  \ | sed -e 's|</description>||g' | head -n 3 | tail -n 1")
+  exec "MacNotifyExpand l:weather"
+endfunction
+command! WeatherReport call s:weather_report()

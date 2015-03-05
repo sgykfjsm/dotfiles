@@ -74,6 +74,34 @@ openapp() {
 zle -N openapp
 bindkey '^o' openapp
 
+diff_rec() {
+    [ $# -ne 2 ] || {
+        echo "Passed parameters should be 2"
+        return 1
+    }
+
+    [ -d "$1" ] || {
+        echo "$1 is not directory."
+        return 1
+    }
+    local dir1=$1;shift
+
+    [ -d "$1" ] || {
+        echo "$1 is not directory."
+        return 1
+    }
+    local dir2=$2;shift
+
+    IFS=$'\n'
+
+    for file in $(grep -Ilsr -m 1 '.' "$dir1"); do
+        res=$(LANG=en diff -q "$file" "${file/${dir1}/${dir2}}" | awk '{print $2, $4}')
+        if [ -n "${res}" ]; then
+            echo ${res}
+        fi
+    done
+}
+
 # markdown preview
 markdown_preview() {
     case $1 in
