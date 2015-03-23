@@ -69,17 +69,14 @@ Plugin 'git@github.com:mattn/emmet-vim.git'
 " golang
 Plugin 'Blackrush/vim-gocode'
 
-" snippets
-Plugin 'git@github.com:honza/vim-snippets.git'
+" snippets (fork from honza/vim-snippets.git)
+Plugin 'sgykfjsm/vim-snippets'
 
 " syntax
 Plugin 'scrooloose/syntastic'
 
 " A better JSON for Vim
 Plugin 'elzr/vim-json'
-
-" Syntax highlighting for Bats - Bash Automated Testing System
-Plugin 'vim-scripts/bats.vim'
 
 " Add additional support for Ansible in VIM
 Plugin 'chase/vim-ansible-yaml'
@@ -100,6 +97,8 @@ Plugin 'Shougo/vimshell'
 " whether for mac
 Plugin 'modsound/mac_notify-vim'
 
+" python
+Plugin 'nvie/vim-flake8'
 filetype plugin indent on
 
 "-------------------------------------------------------------------------------
@@ -328,9 +327,6 @@ if !exists('g:neocomplcache_keyword_patterns')
 endif
 let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
 
-" ユーザー定義スニペット保存ディレクトリ
-let g:neocomplcache_snippets_dir = $HOME.'/.vim/snippets'
-
 " Plugin key-mappings.
 inoremap <expr><C-g>     neocomplcache#undo_completion()
 inoremap <expr><C-l>     neocomplcache#complete_common_string()
@@ -371,13 +367,16 @@ let g:neocomplcache_force_omni_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
 let g:neocomplcache_force_omni_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
 let g:neocomplcache_force_omni_patterns.go = '\h\w*\.\?'
 
-" スニペット
-" imap <C-y> <Plug>(neocomplcache_snippets_expand)
-" smap <C-k> <Plug>(neocomplcache_snippets_expand)
+" ユーザー定義スニペット保存ディレクトリ
+let s:vim_snippets = "~/.vim/bundle/vim-snippets/snippets"
+let g:neosnippet#snippets_directory = s:vim_snippets
+" let g:neosnippet#snippets_directory = s:my_snippets
+
 " Plugin key-mappings.
-imap <C-k>     <Plug>(neosnippet_expand_or_jump)
-smap <C-k>     <Plug>(neosnippet_expand_or_jump)
-xmap <C-k>     <Plug>(neosnippet_expand_target)
+" imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+imap <C-s>     <Plug>(neosnippet_expand_or_jump)
+smap <C-s>     <Plug>(neosnippet_expand_or_jump)
+xmap <C-s>     <Plug>(neosnippet_expand_target)
 
 " SuperTab like snippets behavior.
 imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
@@ -633,7 +632,14 @@ command! -nargs=1 -complete=file Rename f <args> | call delete(expand('#')) | w
 auto BufWritePre *.go Fmt
 
 " syntax for bats
-au BufRead, BufNewFile *.bats        set filetype=sh
+au BufRead,BufNewFile *.bats set filetype=sh
+syn match batsTest              "\v\@test"
+syn keyword batsKeyword         run containedin=shExpr contained
+
+hi def link batsTest            Identifier
+hi def link batsKeyword         Keyword
+
+
 let g:ansible_options = {'ignore_blank_lines': 0}
 
 " Better :sign interface symbols
@@ -648,6 +654,21 @@ command! JsonFormat
   \ | :%s/ \+$//ge
   \ | :1
 
+" --------------------------
+" URLリンクをブラウザで開く
+" http://d.hatena.ne.jp/shunsuk/20110508/1304865150
+" --------------------------
+function! HandleURI()
+  let s:uri = matchstr(getline("."), '[a-z]*:\/\/[^ >,;:]*')
+  echo s:uri
+  if s:uri != ""
+    exec "!open \"" . s:uri . "\""
+  else
+    echo "No URI found in line."
+  endif
+endfunction
+
+nnoremap <Space>w :call HandleURI()<CR>
 "----------------------------
 " プラグインごとの設定 Plugins
 "
