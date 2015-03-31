@@ -26,6 +26,7 @@ alias chown="$brew_prefix/bin/gchown"
 alias date="$brew_prefix/bin/gdate"
 unset brew_prefix
 
+alias brew_batch="brew update && brew upgrade && brew cleanup --force"
 # boot2docker
 export DOCKER_HOST=tcp://192.168.59.103:2376
 export DOCKER_CERT_PATH=/Users/sgyk/.boot2docker/certs/boot2docker-vm
