@@ -5,15 +5,18 @@ filetype off
 " golang
 "--------------------------------
 filetype plugin indent off
-set runtimepath+=$GOROOT/misc/vim
+if $GOROOT != ''
+    set rtp+=$GOROOT/misc/vim
+endif
 exe "set rtp+=" . globpath($GOPATH, "src/github.com/golang/lint/misc/vim")
+set rtp+=$GOPATH/src/github.com/nsf/gocode/vim
 set completeopt=menu,preview
 filetype plugin indent on
 
-set rtp+=~/.vim/bundle/vundle/
+set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#rc()
 
-Plugin 'gmarik/vundle'
+Plugin 'VundleVim/Vundle.vim'
 
 " basic config
 Plugin 'tpope/vim-sensible.git'
@@ -87,18 +90,23 @@ Plugin 'itchyny/lightline.vim'
 
 Plugin 'tmux-plugins/vim-tmux'
 
-" Twitter
-Plugin 'TwitVim'
-
 "
-Plugin 'Shougo/vimproc'
 Plugin 'Shougo/vimshell'
-
-" whether for mac
-Plugin 'modsound/mac_notify-vim'
 
 " python
 Plugin 'nvie/vim-flake8'
+Plugin 'davidhalter/jedi-vim'
+
+" golang
+Plugin 'majutsushi/tagbar'
+Plugin 'Shougo/vimfiler'
+Plugin 'Shougo/vimproc'
+Plugin 'Shougo/unite.vim'
+Plugin 'Shougo/unite-outline'
+Plugin 'dgryski/vim-godef'
+Plugin 'vim-jp/vim-go-extra'
+
+
 filetype plugin indent on
 
 "-------------------------------------------------------------------------------
@@ -714,6 +722,15 @@ source ~/dotfiles/.vimrc.NREDTree
 " syntastic
 "---------------------------
 let g:syntastic_json_checkers=['jsonlint']
+" https://github.com/scrooloose/syntastic#3-recommended-settings
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
 
 "---------------------------
 " vim-json
@@ -721,22 +738,54 @@ let g:syntastic_json_checkers=['jsonlint']
 let g:vim_json_syntax_conceal = 0
 
 "---------------------------
-" TwitVim
+"http://qiita.com/shiena/items/870ac0f1db8e9a8672a7
 "---------------------------
-let twitvim_browser_cmd = 'open' " for Mac
-let twitvim_force_ssl = 1
-let twitvim_count = 40
-let twitvim_filter_enable = 1
-let twitvim_filter_regex = '!\v^【(自動|定期).*|(.*https?://ask\.fm.*)|#(countkun|1topi|bookmeter)|(.*(#|＃)[^\s]+){5,}|#RTした人全員|.*分以内に.*RTされたら|^!(RT)|^[^RT].*RT|RT\s.*RT\s'
+" for golang {{{
+set path+=$GOPATH/src/**
+let g:gofmt_command = 'goimports'
+au BufWritePre *.go Fmt
+au BufNewFile,BufRead *.go set sw=4 noexpandtab ts=4 completeopt=menu,preview
+au FileType go compiler go
+" }}}
+
+" VimFilerTree {{{
+command! VimFilerTree call VimFilerTree(<f-args>)
+function VimFilerTree(...)
+    let l:h = expand(a:0 > 0 ? a:1 : '%:p:h')
+    let l:path = isdirectory(l:h) ? l:h : ''
+    exec ':VimFiler -buffer-name=explorer -split -simple -winwidth=45 -toggle -no-quit ' . l:path
+    wincmd t
+    setl winfixwidth
+endfunction
+autocmd! FileType vimfiler call g:My_vimfiler_settings()
+function! g:My_vimfiler_settings()
+    nmap     <buffer><expr><CR> vimfiler#smart_cursor_map("\<Plug>(vimfiler_expand_tree)", "\<Plug>(vimfiler_edit_file)")
+    nnoremap <buffer>s          :call vimfiler#mappings#do_action('my_split')<CR>
+    nnoremap <buffer>v          :call vimfiler#mappings#do_action('my_vsplit')<CR>
+endfunction
+
+let my_action = {'is_selectable' : 1}
+function! my_action.func(candidates)
+    wincmd p
+    exec 'split '. a:candidates[0].action__path
+endfunction
+call unite#custom_action('file', 'my_split', my_action)
+
+let my_action = {'is_selectable' : 1}
+function! my_action.func(candidates)
+    wincmd p
+    exec 'vsplit '. a:candidates[0].action__path
+endfunction
+call unite#custom_action('file', 'my_vsplit', my_action)
+" }}}
 
 "---------------------------
-" 'modsound/mac_notify-vim'
+" davidhalter/jedi-vim
+" http://qiita.com/tekkoc/items/923d7a7cf124e63adab5
 "---------------------------
-function! s:weather_report()
-  let l:weather = system("curl --silent http://weather.livedoor.com/forecast/rss/area/130010.xml
-  \ | grep '<description>'
-  \ | sed -e 's/<description>//g'
-  \ | sed -e 's|</description>||g' | head -n 3 | tail -n 1")
-  exec "MacNotifyExpand l:weather"
-endfunction
-command! WeatherReport call s:weather_report()
+" rename用のマッピングを無効にしたため、代わりにコマンドを定義
+command! -nargs=0 JediRename :call jedi#rename()
+
+" pythonのrename用のマッピングがquickrunとかぶるため回避させる
+let g:jedi#rename_command = ""
+let g:jedi#pydoc = "K"

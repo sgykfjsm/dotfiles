@@ -144,3 +144,20 @@ blog_deploy() {
     rake deploy
     cd - > /dev/null
 }
+
+go_build_run() {
+    which go > /dev/null 2>&1 || return 1
+
+    test $# -eq 1 || {
+        echo "You can pass only 1 filename" >&2
+        return 1
+    }
+
+    test -f "$1" || {
+        echo "$1 is missing" >&2
+        return 1
+    }
+
+    go build ${1}
+    test $? -eq 0 && ./${1%.go}
+}

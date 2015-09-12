@@ -41,3 +41,5 @@
 [diff]
   tool = vimdiff
   algorithm = histogram
+[gui]
+	recentrepo = /Users/sgyk/local/tmp/git-tutorial/RickUmaliVanityWebsite

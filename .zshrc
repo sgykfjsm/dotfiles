@@ -24,22 +24,22 @@ autoload -Uz colors
 # http://www.unix.com/shell-programming-and-scripting/184735-zsh-prompt-variable-expansion-ansi-color-sequences.html
 
 _reset='%{'$(print -P '\033\[0m')'%}'
-fg_white='%{'$(print -P '\033[0;1;37m')'%}'
+fg_white='%{'$(print -P '\033[0;0;37m')'%}'
 fg_lightgray='%{'$(print -P '\033[0;0;37m')'%}'
-fg_gray='%{'$(print -P '\033[0;1;30m')'%}'
+fg_gray='%{'$(print -P '\033[0;0;30m')'%}'
 fg_black='%{'$(print -P '\033[0;0;30m')'%}'
 fg_red='%{'$(print -P '\033[0;0;31m')'%}'
-fg_lightred='%{'$(print -P '\033[0;1;31m')'%}'
+fg_lightred='%{'$(print -P '\033[0;0;31m')'%}'
 fg_green='%{'$(print -P '\033[0;0;32m')'%}'
-fg_lightgreen='%{'$(print -P '\033[0;1;32m')'%}'
+fg_lightgreen='%{'$(print -P '\033[0;0;32m')'%}'
 fg_brown='%{'$(print -P '\033[0;0;33m')'%}'
-fg_yellow='%{'$(print -P '\033[0;1;33m')'%}'
+fg_yellow='%{'$(print -P '\033[0;0;33m')'%}'
 fg_blue='%{'$(print -P '\033[0;0;34m')'%}'
-fg_lightblue='%{'$(print -P '\033[0;1;34m')'%}'
+fg_lightblue='%{'$(print -P '\033[0;0;34m')'%}'
 fg_purple='%{'$(print -P '\033[0;0;35m')'%}'
-fg_pink='%{'$(print -P '\033[0;1;35m')'%}'
+fg_pink='%{'$(print -P '\033[0;0;35m')'%}'
 fg_cyan='%{'$(print -P '\033[0;0;36m')'%}'
-fg_lightcyan='%{'$(print -P '\033[0;1;36m')'%}'
+fg_lightcyan='%{'$(print -P '\033[0;0;36m')'%}'
 bg_black='%{'$(print -P '\033[40m')'%}'
 bg_red='%{'$(print -P '\033[41m')'%}'
 bg_green='%{'$(print -P '\033[42m')'%}'
@@ -143,8 +143,8 @@ function zle-line-init zle-keymap-select {
   # PROMPT+=" ${GIT_PROMPT}"
   PROMPT+="%(?.${fg_white}.${fg_red})%}(%?)${_reset}" # 直前のコマンドのreturn値
   PROMPT+="${fg_yellow}%D{%FT%T.%Z}${_reset}" # 日付と時刻
-  PROMPT+="${fg_green}%/${_reset}" # カレントのディレクトリ
-  PROMPT+="${GIT_PROMPT}"
+  PROMPT+=" ${fg_green}%/${_reset}" # カレントのディレクトリ
+  PROMPT+=" ${GIT_PROMPT}"
   PROMPT+="
 $ " # 改行
   zle reset-prompt
