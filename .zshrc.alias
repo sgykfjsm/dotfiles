@@ -145,19 +145,22 @@ blog_deploy() {
     cd - > /dev/null
 }
 
-go_build_run() {
-    which go > /dev/null 2>&1 || return 1
-
+go_build_and_run() {
+    which go > /dev/null || {
+        echo "Install golang" >&2
+        return -1
+    }
     test $# -eq 1 || {
-        echo "You can pass only 1 filename" >&2
+        echo "You can pass 1 file only" >&2
         return 1
     }
 
-    test -f "$1" || {
-        echo "$1 is missing" >&2
-        return 1
+    test -f $1 || {
+        echo "$1 is not file" >&2
+        return 2
     }
 
-    go build ${1}
-    test $? -eq 0 && ./${1%.go}
+    local go_script=$1
+    go build ${go_script}
+    test $? -eq 0 && ${go_script%.*}
 }

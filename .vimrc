@@ -5,13 +5,15 @@ filetype off
 " golang
 "--------------------------------
 filetype plugin indent off
-if $GOROOT != ''
-    set rtp+=$GOROOT/misc/vim
-endif
 exe "set rtp+=" . globpath($GOPATH, "src/github.com/golang/lint/misc/vim")
 set rtp+=$GOPATH/src/github.com/nsf/gocode/vim
 set completeopt=menu,preview
 filetype plugin indent on
+" # For Omni Completion
+" $ mkdir -p ${GOPATH}/bin
+" $ go get github.com/nsf/gocode
+" $ ${GOPATH}/src/github.com/nsf/gocode/vim/update.sh
+"
 
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#rc()
@@ -22,21 +24,17 @@ Plugin 'VundleVim/Vundle.vim'
 Plugin 'tpope/vim-sensible.git'
 
 " completition
-Plugin 'Shougo/neocomplcache'
 Plugin 'Shougo/neocomplete.vim'
 
 " neocomplcacheのsinpet補完
 Plugin 'https://github.com/Shougo/neosnippet'
-Plugin 'git@github.com:Shougo/neosnippet-snippets.git'
+Plugin 'Shougo/neosnippet-snippets.git'
 
 " JavaScript
 Plugin 'JavaScript-syntax'
 
 " coffee script
 Plugin 'kchmck/vim-coffee-script'
-
-" scala
-Plugin 'yuroyoro/vim-scala'
 
 " minibufe:pl.vim : タブエディタ風にバッファ管理ウィンドウを表示
 Plugin 'minibufexpl.vim'
@@ -54,9 +52,6 @@ Plugin 'w0ng/vim-hybrid'
 " indent guide
 Plugin 'nathanaelkane/vim-indent-guides'
 
-" play2
-Plugin 'gre/play2vim'
-
 " html5
 Plugin 'othree/html5.vim'
 
@@ -67,10 +62,16 @@ Plugin 'git://github.com/tpope/vim-fugitive.git'
 Plugin 'airblade/vim-gitgutter'
 
 " HTML/CSS
-Plugin 'git@github.com:mattn/emmet-vim.git'
+Plugin 'mattn/emmet-vim.git'
 
 " golang
+Plugin 'fatih/vim-go'
 Plugin 'Blackrush/vim-gocode'
+Plugin 'majutsushi/tagbar'
+Plugin 'Shougo/unite.vim'
+Plugin 'Shougo/unite-outline'
+Plugin 'dgryski/vim-godef'
+Plugin 'vim-jp/vim-go-extra'
 
 " snippets (fork from honza/vim-snippets.git)
 Plugin 'sgykfjsm/vim-snippets'
@@ -90,22 +91,24 @@ Plugin 'itchyny/lightline.vim'
 
 Plugin 'tmux-plugins/vim-tmux'
 
-"
+Plugin 'Shougo/vimproc'
 Plugin 'Shougo/vimshell'
 
 " python
 Plugin 'nvie/vim-flake8'
 Plugin 'davidhalter/jedi-vim'
+" after intall jedi-vim...
+" cd ~/.vim/bundle/jedi-vim
+" git submodule update --init
+Plugin 'kevinw/pyflakes-vim'
+" after intall pyflakes-vim...
+" cd cd ~/.vim/bundle/pyflakes-vim/
+" git submodule update --init
 
-" golang
-Plugin 'majutsushi/tagbar'
-Plugin 'Shougo/vimfiler'
-Plugin 'Shougo/vimproc'
-Plugin 'Shougo/unite.vim'
-Plugin 'Shougo/unite-outline'
-Plugin 'dgryski/vim-godef'
-Plugin 'vim-jp/vim-go-extra'
+"
+Plugin 'tpope/vim-surround.git'
 
+Plugin 'nginx.vim'
 
 filetype plugin indent on
 
@@ -163,7 +166,8 @@ elseif &term =~ "xterm-color"
   set t_Sb=[4%dm
 endif
 
-let g:hybrid_use_iTerm_colors = 1
+let g:hybrid_use_Xresources = 1
+set background=dark
 colorscheme hybrid
 
 " ハイライト on
@@ -257,7 +261,6 @@ if has("autocmd")
   autocmd FileType xml        setlocal sw=4 sts=4 ts=4 et
   autocmd FileType yaml       setlocal sw=2 sts=2 ts=2 et
   autocmd FileType zsh        setlocal sw=4 sts=4 ts=4 et
-  autocmd FileType scala      setlocal sw=4 sts=4 ts=4 et
   autocmd FileType bats       setlocal sw=4 sts=4 ts=4 et
 endif
 
@@ -290,39 +293,29 @@ cnoremap <C-n> <Down>
 cnoremap <Down>  <C-n>
 
 "------------------------------------
-" 補完にneocomplcacheを使う
-" neocomplecache.vim
+" 補完にneocomplを使う
+" neocomple.vim
 "------------------------------------
 " Note: This option must set it in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
 " Disable AutoComplPop.
 let g:acp_enableAtStartup = 0
-" Use neocomplcache.
-let g:neocomplcache_enable_at_startup = 1
+" Use neocompl.
+let g:neocomplete#enable_at_startup = 1
 " Use smartcase.
-let g:neocomplcache_enable_smart_case = 1
+let g:neocomplete#enable_smart_case = 1
 " Set minimum syntax keyword length.
-let g:neocomplcache_min_syntax_length = 3
-let g:neocomplcache_lock_buffer_name_pattern = '\*ku\*'
+let g:neocomplete#sources#syntax#min_keyword_length = 1
+let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
 
 " 補完が自動で開始される文字数
-let g:neocomplcache_auto_completion_start_length = 3
-" 入力による候補番号の表示
-let g:neocomplcache_enable_quick_match = 1
+let g:neocomplete#auto_completion_start_length = 1
 "ポップアップメニューで表示される候補の数。初期値は100
-let g:neocomplcache_max_list = 20
-
-
-" Enable heavy features.
-" Use camel case completion.
-let g:neocomplcache_enable_camel_case_completion = 1
-" Use underbar completion.
-let g:neocomplcache_enable_underbar_completion = 1
+let g:neocomplete#max_list = 20
 
 " Define dictionary.
-let g:neocomplcache_dictionary_filetype_lists = {
+let g:neocomplete#sources#dictionary#dictionaries = {
     \ 'default' : '',
     \ 'vimshell' : $HOME.'/.vimshell_hist',
-    \ 'scala' : $HOME.'/.vim/bundle/vim-scala/dict/scala.dict',
     \ 'javascript' : $HOME.'/.vim/dict/javascript.dict',
     \ 'perl' : $HOME.'/.vim/dict/perl.dict',
     \ 'php' : $HOME.'/.vim/dict/php.dict',
@@ -330,30 +323,31 @@ let g:neocomplcache_dictionary_filetype_lists = {
     \ }
 
 " Define keyword.
-if !exists('g:neocomplcache_keyword_patterns')
-    let g:neocomplcache_keyword_patterns = {}
+if !exists('g:neocomplete#keyword_patterns')
+    let g:neocomplete#keyword_patterns = {}
 endif
-let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
+let g:neocomplete#keyword_patterns['default'] = '\h\w*'
 
 " Plugin key-mappings.
-inoremap <expr><C-g>     neocomplcache#undo_completion()
-inoremap <expr><C-l>     neocomplcache#complete_common_string()
+inoremap <expr><C-g>     neocomplete#undo_completion()
+inoremap <expr><C-l>     neocomplete#complete_common_string()
 
 " Recommended key-mappings.
 " <CR>: close popup and save indent.
 inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
 function! s:my_cr_function()
-  return neocomplcache#smart_close_popup() . "\<CR>"
+  return (pumvisible() ? "\<C-y>" : "" ) . "\<CR>"
   " For no inserting <CR> key.
-  "return pumvisible() ? neocomplcache#close_popup() : "\<CR>"
+  "return pumvisible() ? "\<C-y>" : "\<CR>"
 endfunction
 " <C-h>, <BS>: close popup and delete backword char.
-inoremap <expr><C-h> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><C-y>  neocomplcache#close_popup()
-inoremap <expr><C-e>  neocomplcache#cancel_popup()
+inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
+inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
 " Close popup by <Space>.
-inoremap <expr><Space> pumvisible() ? neocomplcache#close_popup() : "\<Space>"
+inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
+
+" AutoComplPop like behavior.
+" let g:neocomplete#enable_auto_select = 1
 
 " Enable omni completion.
 autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
@@ -364,16 +358,16 @@ autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 autocmd FileType php        setlocal omnifunc=phpcomplete#CompletePHP
 autocmd FileType ruby       setlocal omnifunc=rubycomplete#Complete
-autocmd FileType go       setlocal omnifunc=gocomplete#Complete
+" autocmd FileType go       setlocal omnifunc=gocomplete#Complete
 
 " Enable heavy omni completion.
-if !exists('g:neocomplcache_force_omni_patterns')
-  let g:neocomplcache_force_omni_patterns = {}
+if !exists('g:neocomplete#sources#omni#input_patterns')
+  let g:neocomplete#sources#omni#input_patterns = {}
 endif
-let g:neocomplcache_force_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-let g:neocomplcache_force_omni_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-let g:neocomplcache_force_omni_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
-let g:neocomplcache_force_omni_patterns.go = '\h\w*\.\?'
+let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
+let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
+let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
+" let g:neocomplete#sources#omni#input_patterns.go = '\h\w*\.\?'
 
 " ユーザー定義スニペット保存ディレクトリ
 let s:vim_snippets = "~/.vim/bundle/vim-snippets/snippets"
@@ -398,27 +392,6 @@ smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
 if has('conceal')
   set conceallevel=2 concealcursor=i
 endif
-
-" buffer開いたらneoconでcache
-autocmd BufReadPost,BufEnter,BufWritePost :NeoComplCacheCachingBuffer <buffer>
-
-"インクルードパスの指定
-let g:neocomplcache_include_paths = {
-  \ }
-"インクルード文のパターンを指定
-let g:neocomplcache_include_patterns = {
-  \ }
-"インクルード先のファイル名の解析パターン
-let g:neocomplcache_include_exprs = {
-  \ }
-" ファイルを探す際に、この値を末尾に追加したファイルも探す。
-let g:neocomplcache_include_suffixes = {
-  \ 'haskell' : '.hs'
-  \ }
-
-" タグファイル
-set tags +=~/.tags/play.tag
-set tags +=~/.tags/scala.tag
 
 "-------------------------------------------------------------------------------
 " 検索設定 Search
@@ -571,6 +544,7 @@ nmap y0 y^
 
 " 保存時に行末の空白を除去する
 autocmd BufWritePre * :%s/\s\+$//ge
+autocmd BufWritePre * :redraw!
 
 " 日時の自動入力
 inoremap <expr> ,df strftime('%Y-%m-%d %H:%M:%S')
@@ -606,6 +580,7 @@ au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g
 "-------------------------------------------------------------------------------
 set ffs=unix,dos,mac  " 改行文字
 set encoding=utf-8    " デフォルトエンコーディング
+setglobal fileencoding=utf-8
 
 " cvsの時は文字コードをeuc-jpに設定
 autocmd FileType cvs :set fileencoding=euc-jp
@@ -616,7 +591,6 @@ autocmd FileType css :set fileencoding=utf-8
 autocmd FileType html :set fileencoding=utf-8
 autocmd FileType xml :set fileencoding=utf-8
 autocmd FileType java :set fileencoding=utf-8
-autocmd FileType scala :set fileencoding=utf-8
 
 " ワイルドカードで表示するときに優先度を低くする拡張子
 set suffixes=.bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,.blg,.brf,.cb,.ind,.idx,.ilg,.inx,.out,.toc
@@ -651,7 +625,7 @@ hi def link batsKeyword         Keyword
 let g:ansible_options = {'ignore_blank_lines': 0}
 
 " Better :sign interface symbols
-let g:syntastic_error_symbol = '✗'
+let g:syntastic_error_symbol = 'x'
 let g:syntastic_warning_symbol = '!'
 
 "---------------------------
@@ -720,17 +694,16 @@ source ~/dotfiles/.vimrc.NREDTree
 
 "---------------------------
 " syntastic
+"" pyflakes-vim
+"" http://qiita.com/tekkoc/items/923d7a7cf124e63adab5
 "---------------------------
 let g:syntastic_json_checkers=['jsonlint']
-" https://github.com/scrooloose/syntastic#3-recommended-settings
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
-
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
+let g:syntastic_go_checkers = ['go', 'golint', 'govet', 'errcheck']
+let g:syntastic_mode_map = {
+            \ 'mode': 'active',
+            \ 'active_filetypes': ['php', 'coffeescript', 'sh', 'vim', 'go', 'md', 'markdown'],
+            \ 'passive_filetypes': ['html', 'haskell', 'python'],
+            \ }
 
 "---------------------------
 " vim-json
@@ -738,7 +711,20 @@ let g:syntastic_check_on_wq = 0
 let g:vim_json_syntax_conceal = 0
 
 "---------------------------
-"http://qiita.com/shiena/items/870ac0f1db8e9a8672a7
+" 'modsound/mac_notify-vim'
+"---------------------------
+function! s:weather_report()
+  let l:weather = system("curl --silent http://weather.livedoor.com/forecast/rss/area/130010.xml
+  \ | grep '<description>'
+  \ | sed -e 's/<description>//g'
+  \ | sed -e 's|</description>||g' | head -n 3 | tail -n 1")
+  exec "MacNotifyExpand l:weather"
+endfunction
+command! WeatherReport call s:weather_report()
+
+
+"---------------------------
+" http://qiita.com/shiena/items/870ac0f1db8e9a8672a7
 "---------------------------
 " for golang {{{
 set path+=$GOPATH/src/**
@@ -748,44 +734,45 @@ au BufNewFile,BufRead *.go set sw=4 noexpandtab ts=4 completeopt=menu,preview
 au FileType go compiler go
 " }}}
 
-" VimFilerTree {{{
-command! VimFilerTree call VimFilerTree(<f-args>)
-function VimFilerTree(...)
-    let l:h = expand(a:0 > 0 ? a:1 : '%:p:h')
-    let l:path = isdirectory(l:h) ? l:h : ''
-    exec ':VimFiler -buffer-name=explorer -split -simple -winwidth=45 -toggle -no-quit ' . l:path
-    wincmd t
-    setl winfixwidth
-endfunction
-autocmd! FileType vimfiler call g:My_vimfiler_settings()
-function! g:My_vimfiler_settings()
-    nmap     <buffer><expr><CR> vimfiler#smart_cursor_map("\<Plug>(vimfiler_expand_tree)", "\<Plug>(vimfiler_edit_file)")
-    nnoremap <buffer>s          :call vimfiler#mappings#do_action('my_split')<CR>
-    nnoremap <buffer>v          :call vimfiler#mappings#do_action('my_vsplit')<CR>
-endfunction
-
-let my_action = {'is_selectable' : 1}
-function! my_action.func(candidates)
-    wincmd p
-    exec 'split '. a:candidates[0].action__path
-endfunction
-call unite#custom_action('file', 'my_split', my_action)
-
-let my_action = {'is_selectable' : 1}
-function! my_action.func(candidates)
-    wincmd p
-    exec 'vsplit '. a:candidates[0].action__path
-endfunction
-call unite#custom_action('file', 'my_vsplit', my_action)
-" }}}
-
-"---------------------------
-" davidhalter/jedi-vim
+"-------------------------------------------------------------------------------
+" jedi-vim
 " http://qiita.com/tekkoc/items/923d7a7cf124e63adab5
-"---------------------------
+"-------------------------------------------------------------------------------
 " rename用のマッピングを無効にしたため、代わりにコマンドを定義
 command! -nargs=0 JediRename :call jedi#rename()
 
 " pythonのrename用のマッピングがquickrunとかぶるため回避させる
 let g:jedi#rename_command = ""
-let g:jedi#pydoc = "K"
+let g:jedi#documentation_command = "K"
+
+"-------------------------------------------------------------------------------
+" vim-go
+"-------------------------------------------------------------------------------
+let g:go_highlight_functions = 1
+let g:go_highlight_methods = 1
+let g:go_highlight_structs = 1
+let g:go_highlight_operators = 1
+let g:go_highlight_build_constraints = 1
+
+"-------------------------------------------------------------------------------
+" vim-gitgutter
+"-------------------------------------------------------------------------------
+" let g:gitgutter_realtime = 0
+" let g:gitgutter_eager = 0
+let g:gitgutter_sign_added = '+'
+let g:gitgutter_sign_modified = '*'
+let g:gitgutter_sign_removed = '-'
+let g:gitgutter_sign_removed_first_line = '^'
+let g:gitgutter_sign_modified_removed = 'w'
+
+let g:syntastic_error_symbol = 'x'
+let g:syntastic_warning_symbol = '!'
+let g:syntastic_style_error_symbol = 'S'
+let g:syntastic_style_warning_symbol = 'S'
+highlight SyntasticErrorLine guibg=#000000
+
+"-------------------------------------------------------------------------------
+" nginx
+"-------------------------------------------------------------------------------
+au BufRead,BufNewFile */nginx/* if &ft == '' | setfiletype nginx | endif
+

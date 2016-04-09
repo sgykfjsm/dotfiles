@@ -9,7 +9,7 @@ export LSCOLORS=ExFxCxDxBxegedabagacad
 
 # vim
 export EDITOR=/Applications/MacVim.app/Contents/MacOS/Vim
-alias vi='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
+alias vi='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "${@[1,${#@}]}"'
 alias vim='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
 
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_15.jdk/Contents/Home
@@ -26,19 +26,16 @@ alias chown="$brew_prefix/bin/gchown"
 alias date="$brew_prefix/bin/gdate"
 unset brew_prefix
 
-alias brew_batch="brew update && brew upgrade && brew cleanup --force"
-# boot2docker
-export DOCKER_HOST=tcp://192.168.59.103:2376
-export DOCKER_CERT_PATH=/Users/sgyk/.boot2docker/certs/boot2docker-vm
-export DOCKER_TLS_VERIFY=1
+alias brew_batch="brew update && brew upgrade --all && brew cleanup --force"
 
 ### golang
-export GOROOT=/usr/local/go
-export GOPATH=/Users/sgyk/local/script/golang
-export PATH=$PATH:${GOROOT}/bin:${GOPATH}/bin
+export GOROOT=/usr/local/Cellar/go/1.6/libexec
+
+export GOPATH=${HOME}/local/scripts/golang
+export PATH=$PATH:/usr/local/opt/go/libexec/bin:/usr/local/opt/go/bin:${GOROOT}/bin:${GOPATH}/bin
 
 ## git-flowの補完
-source ~/.zsh_tools/git-flow-completion/git-flow-completion.plugin.zsh
+source ~/.zsh-tools/git-flow-completion/git-flow-completion.plugin.zsh
 
 ## 自分用関数のための環境変数
 BLOG_HOME=~/local/blog
@@ -58,4 +55,45 @@ export PATH="/usr/local/heroku/bin:$PATH"
 
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 export SCALATRA_JREBEL=~/bin/jrebel.jar
+
+## java
+export JAVA_HOME=$(/usr/libexec/java_home)
+
+## docker
+eval "$(docker-machine env default)"
+
+# gem
+export PATH=/Users/jp20404/.gem/ruby/2.1.0/bin:${PATH}
+
+# android
+export ANDROID_HOME=/Users/jp20404/local/scripts/android/android-sdk-macosx
+export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
+
+function memo(){
+    local mid=
+    if [ $# -gt 0 ]; then
+        mid="$1"
+        shift
+    fi
+
+    local dir="${HOME}/local/memo"
+    if [ ! -d ${dir} ]; then
+        mkdir -pv ${MEMO_DIR}
+    fi
+
+    local filename=${dir}/$(date '+%Y%m%d')
+    if [ ! -z "${mid}" ]; then
+        filename=${filename}_${mid// /-}
+    fi
+
+    for i in $(seq 1 100)
+    do
+        if [ ! -f ${filename}.md ]; then
+            break
+        fi
+        filename=${filename}_$(printf "%03d" ${i})
+    done
+
+    vim ${filename}.md
+}
 

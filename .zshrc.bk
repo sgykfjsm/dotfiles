@@ -51,11 +51,7 @@ bg_white='%{'$(print -P '\033[47m')'%}'
 
 ## Default shell configuration
 #
-# set prompt
-# setopt prompt_subst
-# 改行のない出力をプロンプトで上書きするのを防ぐ
-# http://stackoverflow.com/questions/24178153/why-zsh-doesnt-print-string-which-doesnt-contain-new-line
-setopt PROMPT_CR
+set prompt
 case ${UID} in
 0) # root
     PROMPT="${fg_red}%/#${_reset}%b "
@@ -64,10 +60,12 @@ case ${UID} in
         PROMPT="${fg_cyan}$(echo ${HOST%%.*} | tr '[a-z]' '[A-Z]') ${PROMPT}"
     ;;
 *)
-  unset PROMPT
 #
 # Prompt
 #
+setopt prompt_subst
+# 改行のない出力をプロンプトで上書きするのを防ぐ
+unsetopt promptcr
 
 # Show git branch when you are in git repository
 # http://d.hatena.ne.jp/mollifier/20100906/p1
@@ -139,12 +137,16 @@ function zle-line-init zle-keymap-select {
         # PROMPT="[%n@%m}]"
     ;;
   esac
-  PROMPT+="%(?.${fg_white}.${fg_red})%}(%?)${_reset}" # 直前のコマンドのreturn値
-  PROMPT+=" ${fg_yellow}%D{%FT%T.%Z}${_reset}" # 日付と時刻
-  PROMPT+=" ${fg_green}%/${_reset}" # カレントのディレクトリ
-  PROMPT+=" ${GIT_PROMPT}"
-  PROMPT+="
-$ " # 改行
+  # PROMPT+=" %D{%FT%T.%Z}" # 日付と時刻
+  # PROMPT+=" ${_reset}${fg[yellow]}%/${_reset}" # カレントのディレクトリ
+  # PROMPT+=" ${_reset}%{$fg[black]%(?.$bg[green].$bg[red])%}%?${_reset}" # 直前のコマンドのreturn値
+  # PROMPT+=" ${GIT_PROMPT}"
+#   PROMPT+="%(?.${fg_white}.${fg_red})%}(%?)${_reset}" # 直前のコマンドのreturn値
+#   PROMPT+=" ${fg_yellow}%D{%FT%T.%Z}${_reset}" # 日付と時刻
+#   PROMPT+=" ${fg_green}%/${_reset}" # カレントのディレクトリ
+#   PROMPT+=" ${GIT_PROMPT}"
+#   PROMPT+="
+# $ " # 改行
   zle reset-prompt
 }
 PROMPT2=''
@@ -531,6 +533,3 @@ fi
 if which pyenv > /dev/null; then eval "$(pyenv init -)"; fi
 if which pyenv-virtualenv-init > /dev/null; then eval "$(pyenv virtualenv-init -)"; fi
 
-
-# added by travis gem
-[ -f /Users/jp20404/.travis/travis.sh ] && source /Users/jp20404/.travis/travis.sh
