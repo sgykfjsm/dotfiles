@@ -29,10 +29,13 @@ unset brew_prefix
 alias brew_batch="brew update && brew upgrade --all && brew cleanup --force"
 
 ### golang
-export GOROOT=/usr/local/Cellar/go/1.6/libexec
+export GOROOT=/usr/local/Cellar/go/1.7/libexec
 
 export GOPATH=${HOME}/local/scripts/golang
 export PATH=$PATH:/usr/local/opt/go/libexec/bin:/usr/local/opt/go/bin:${GOROOT}/bin:${GOPATH}/bin
+if [ -d "${GOPATH}" ]; then
+    alias gopath="cd ${GOPATH}"
+fi
 
 ## git-flowの補完
 source ~/.zsh-tools/git-flow-completion/git-flow-completion.plugin.zsh
@@ -58,9 +61,6 @@ export SCALATRA_JREBEL=~/bin/jrebel.jar
 
 ## java
 export JAVA_HOME=$(/usr/libexec/java_home)
-
-## docker
-eval "$(docker-machine env default)"
 
 # gem
 export PATH=/Users/jp20404/.gem/ruby/2.1.0/bin:${PATH}
