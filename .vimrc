@@ -100,15 +100,15 @@ Plugin 'davidhalter/jedi-vim'
 " after intall jedi-vim...
 " cd ~/.vim/bundle/jedi-vim
 " git submodule update --init
-Plugin 'kevinw/pyflakes-vim'
-" after intall pyflakes-vim...
-" cd cd ~/.vim/bundle/pyflakes-vim/
-" git submodule update --init
 
 "
 Plugin 'tpope/vim-surround.git'
 
 Plugin 'nginx.vim'
+
+Plugin 'ekalinin/Dockerfile.vim'
+
+Plugin 'rizzatti/dash.vim'
 
 filetype plugin indent on
 
@@ -304,7 +304,7 @@ let g:neocomplete#enable_at_startup = 1
 " Use smartcase.
 let g:neocomplete#enable_smart_case = 1
 " Set minimum syntax keyword length.
-let g:neocomplete#sources#syntax#min_keyword_length = 1
+let g:neocomplete#sources#syntax#min_keyword_length = 3
 let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
 
 " 補完が自動で開始される文字数
@@ -336,15 +336,16 @@ inoremap <expr><C-l>     neocomplete#complete_common_string()
 " <CR>: close popup and save indent.
 inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
 function! s:my_cr_function()
-  return (pumvisible() ? "\<C-y>" : "" ) . "\<CR>"
-  " For no inserting <CR> key.
-  "return pumvisible() ? "\<C-y>" : "\<CR>"
+  return neocomplete#close_popup() . "\<CR>"
 endfunction
 " <C-h>, <BS>: close popup and delete backword char.
 inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
-inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
-" Close popup by <Space>.
-inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
+inoremap <expr><BS>  neocomplete#smart_close_popup()."\<C-h>"
+inoremap <expr><C-y> neocomplete#close_popup()
+inoremap <expr><C-e> neocomplete#cancel_popup()
+
+" <TAB>: completion.
+inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
 
 " AutoComplPop like behavior.
 " let g:neocomplete#enable_auto_select = 1
@@ -358,7 +359,13 @@ autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 autocmd FileType php        setlocal omnifunc=phpcomplete#CompletePHP
 autocmd FileType ruby       setlocal omnifunc=rubycomplete#Complete
-" autocmd FileType go       setlocal omnifunc=gocomplete#Complete
+" Go related mappings
+au FileType go nmap <Leader>i <Plug>(go-info)
+au FileType go nmap <Leader>gd <Plug>(go-doc)
+au FileType go nmap <Leader>r <Plug>(go-run)
+au FileType go nmap <Leader>b <Plug>(go-build)
+au FileType go nmap <Leader>t <Plug>(go-test)
+au FileType go nmap gd <Plug>(go-def-tab)"
 
 " Enable heavy omni completion.
 if !exists('g:neocomplete#sources#omni#input_patterns')
@@ -694,15 +701,14 @@ source ~/dotfiles/.vimrc.NREDTree
 
 "---------------------------
 " syntastic
-"" pyflakes-vim
-"" http://qiita.com/tekkoc/items/923d7a7cf124e63adab5
 "---------------------------
 let g:syntastic_json_checkers=['jsonlint']
+let g:syntastic_python_checkers = ['flake8']
 let g:syntastic_go_checkers = ['go', 'golint', 'govet', 'errcheck']
 let g:syntastic_mode_map = {
             \ 'mode': 'active',
-            \ 'active_filetypes': ['php', 'coffeescript', 'sh', 'vim', 'go', 'md', 'markdown'],
-            \ 'passive_filetypes': ['html', 'haskell', 'python'],
+            \ 'active_filetypes': ['php', 'coffeescript', 'sh', 'vim', 'go', 'md', 'markdown', 'python'],
+            \ 'passive_filetypes': ['html', 'haskell'],
             \ }
 
 "---------------------------
@@ -776,3 +782,39 @@ highlight SyntasticErrorLine guibg=#000000
 "-------------------------------------------------------------------------------
 au BufRead,BufNewFile */nginx/* if &ft == '' | setfiletype nginx | endif
 
+"-------------------------------------------------------------------------------
+" tagbar
+"-------------------------------------------------------------------------------
+let g:tagbar_type_go = {
+    \ 'ctagstype' : 'go',
+    \ 'kinds'     : [
+        \ 'p:package',
+        \ 'i:imports:1',
+        \ 'c:constants',
+        \ 'v:variables',
+        \ 't:types',
+        \ 'n:interfaces',
+        \ 'w:fields',
+        \ 'e:embedded',
+        \ 'm:methods',
+        \ 'r:constructor',
+        \ 'f:functions'
+    \ ],
+    \ 'sro' : '.',
+    \ 'kind2scope' : {
+        \ 't' : 'ctype',
+        \ 'n' : 'ntype'
+    \ },
+    \ 'scope2kind' : {
+        \ 'ctype' : 't',
+        \ 'ntype' : 'n'
+    \ },
+    \ 'ctagsbin'  : 'gotags',
+    \ 'ctagsargs' : '-sort -silent'
+\ }
+
+"-------------------------------------------------------------------------------
+" rizzatti/dash.vim
+" https://raw.githubusercontent.com/rizzatti/dash.vim/master/doc/dash.txt
+"-------------------------------------------------------------------------------
+nmap <silent> <leader>d <Plug>DashSearch
